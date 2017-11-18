@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	
+	<!-- SessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="configLocation"
+			value="classpath:hibernate.cfg.xml">
+		</property>
+	</bean>
+	
+	<!-- MailSender -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host"><value>smtp.qq.com</value></property>
+		<property name="port"><value>25</value></property>
+		<property name="username"><value>358930328@qq.com</value></property>
+		<property name="password"><value>djjsdtc19921211</value></property>
+	</bean>
+	
+	<!-- DAOs -->
+	<bean id="TUserDAO" class="org.wingame.dao.TUserDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="TAnnounceDAO" class="org.wingame.dao.TAnnounceDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="TMeetingStatusDAO"
+		class="org.wingame.dao.TMeetingStatusDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="TMeetingDAO" class="org.wingame.dao.TMeetingDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="TDocumentDAO" class="org.wingame.dao.TDocumentDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="VMeetingCountDAO"
+		class="org.wingame.dao.VMeetingCountDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="VMeetingDAO" class="org.wingame.dao.VMeetingDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="VMailsendingDAO"
+		class="org.wingame.dao.VMailsendingDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	
+	<!-- Background Services -->
+	<bean id="UserService" class="org.wingame.service.UserService">
+		<property name="tUserDAO">
+			<ref bean="TUserDAO" />
+		</property>
+	</bean>
+	<bean id="MailService" class="org.wingame.service.MailService">
+		<property name="mailSender">
+			<ref bean="mailSender" />
+		</property>
+	</bean>
+	<bean id="MeetingService" class="org.wingame.service.MeetingService">
+		<property name="tMeetingDAO">
+			<ref bean="TMeetingDAO" />
+		</property>
+		<property name="tMeetingStatusDAO">
+			<ref bean="TMeetingStatusDAO" />
+		</property>
+		<property name="tUserDAO">
+			<ref bean="TUserDAO" />
+		</property>
+	</bean>
+	<bean id="AnnounceService" class="org.wingame.service.AnnouncementService">
+		<property name="tAnnounceDAO">
+			<ref bean="TAnnounceDAO" />
+		</property>
+	</bean>
+	<bean id="FileService" class="org.wingame.service.FileService">
+		<property name="tDocumentDAO">
+			<ref bean="TDocumentDAO" />
+		</property>
+		<property name="tMeetingDAO">
+			<ref bean="TMeetingDAO" />
+		</property>
+		<property name="tUserDAO">
+			<ref bean="TUserDAO" />
+		</property>
+	</bean>
+	<bean id="FileMgmtService" class="org.wingame.service.FileMgmtService">
+		<property name="tDocumentDAO">
+			<ref bean="TDocumentDAO" />
+		</property>
+		<property name="tMeetingDAO">
+			<ref bean="TMeetingDAO" />
+		</property>
+		<property name="tUserDAO">
+			<ref bean="TUserDAO" />
+		</property>
+	</bean>
+	
+	<!-- Actions -->
+	<bean id="SidebarAction" class="org.wingame.action.SidebarAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="LoginAction" class="org.wingame.action.login.LoginAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="RegisterAction" class="org.wingame.action.login.RegisterAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="ChangeMailAction" class="org.wingame.action.login.ChangeMailAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="ChangePasswordAction" class="org.wingame.action.login.ChangePasswordAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="ResetPasswordAction" class="org.wingame.action.login.ResetPasswordAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+		<property name="mailService">
+			<ref bean="MailService" />
+		</property>
+	</bean>
+	<bean id="PermissionLinkAction" class="org.wingame.action.PermissionLinkAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="UserRemoveAction" class="org.wingame.action.usermgmt.UserRemoveAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="PermissionButtonAction" class="org.wingame.action.PermissionButtonAction" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="MeetingAttendedAction" class="org.wingame.action.meeting.MeetingAttendedAction" scope="prototype">
+		<property name="meetingService">
+			<ref bean="MeetingService" />
+		</property>
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="MeetingAction" class="org.wingame.action.meeting.MeetingAction" scope="prototype">
+		<property name="meetingService">
+			<ref bean="MeetingService" />
+		</property>
+	</bean>
+	<bean id="AnnounceAction" class="org.wingame.action.announcement.AnnounceAction" scope="prototype">
+		<property name="meetingService">
+			<ref bean="MeetingService" />
+		</property>
+		<property name="announceService">
+			<ref bean="AnnounceService" />
+		</property>
+	</bean>
+	<bean id="AnnounceRemoveAction" class="org.wingame.action.announcement.AnnounceRemoveAction" scope="prototype">
+		<property name="announceService">
+			<ref bean="AnnounceService" />
+		</property>
+	</bean>
+	<bean id="MeetingRemoveAction" class="org.wingame.action.meeting.MeetingRemoveAction" scope="prototype">
+		<property name="meetingService">
+			<ref bean="MeetingService" />
+		</property>
+	</bean>
+	<bean id="FileStatusAction" class="org.wingame.action.fileupload.FileStatusAction" scope="prototype">
+		<property name="fileService">
+			<ref bean="FileService" />
+		</property>
+		<property name="message"><null /></property>
+	</bean>
+	<bean id="FileStatusAction2" class="org.wingame.action.fileupload.FileStatusAction" scope="prototype">
+		<property name="fileService">
+			<ref bean="FileService" />
+		</property>
+	</bean>
+	<bean id="FileUploadAction" class="org.wingame.action.fileupload.FileUploadAction" scope="prototype">
+		<property name="fileService">
+			<ref bean="FileService" />
+		</property>
+	</bean>
+	<bean id="FileDeleteAction" class="org.wingame.action.fileupload.FileDeleteAction" scope="prototype">
+		<property name="fileService">
+			<ref bean="FileService" />
+		</property>
+	</bean>
+	<bean id="FileListAction" class="org.wingame.action.filemgmt.FileListAction" scope="prototype">
+		<property name="service">
+			<ref bean="FileMgmtService" />
+		</property>
+	</bean>
+	<bean id="FileVerifyAction" class="org.wingame.action.filemgmt.FileVerifyAction" scope="prototype">
+		<property name="service">
+			<ref bean="FileMgmtService" />
+		</property>
+		<property name="mailService">
+			<ref bean="MailService" />
+		</property>
+	</bean>
+	<bean id="ApplyHomeAction" class="org.wingame.action.application.ApplyHomeAction" scope="prototype">
+		<property name="fileService">
+			<ref bean="FileService" />
+		</property>
+		<property name="meetingService">
+			<ref bean="MeetingService" />
+		</property>
+	</bean>
+	<bean id="ApplicationAction" class="org.wingame.action.application.ApplicationAction" scope="prototype">
+		<property name="meetingService">
+			<ref bean="MeetingService" />
+		</property>
+	</bean>
+	<bean id="ExcelTableAction" class="org.wingame.action.meeting.ExcelTableAction" scope="prototype">
+		<property name="service">
+			<ref bean="MeetingService" />
+		</property>
+	</bean>
+	
+	<!-- Interceptors -->
+	<bean id="CookieInterceptor" class="org.wingame.interceptors.CookieInterceptor" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+	<bean id="PermissionInterceptor" class="org.wingame.interceptors.PermissionInterceptor" scope="prototype">
+		<property name="userService">
+			<ref bean="UserService" />
+		</property>
+	</bean>
+</beans>

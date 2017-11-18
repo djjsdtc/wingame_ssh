@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<constant name="struts.action.extension" value=",do,action"/>
+	<constant name="struts.ui.theme" value="simple"/>
+	<constant name="struts.multipart.maxSize" value="10486784" />
+	
+	<package name="wingame-default" extends="struts-default" abstract="true">
+		<interceptors>
+			<interceptor name="CookieInterceptor" class="CookieInterceptor" />
+			<interceptor name="LoginInterceptor" class="org.wingame.interceptors.LoginInterceptor" />
+			<interceptor name="PermissionInterceptor" class="PermissionInterceptor" />
+			<interceptor name="GetMethodInterceptor" class="org.wingame.interceptors.GetMethodInterceptor" />
+			<interceptor-stack name="CommonStack">
+				<interceptor-ref name="defaultStack" />
+				<interceptor-ref name="CookieInterceptor" />
+			</interceptor-stack>
+			<interceptor-stack name="GuestStack">
+				<interceptor-ref name="CommonStack" />
+				<interceptor-ref name="PermissionInterceptor">
+					<param name="permissionLevel">g</param>
+				</interceptor-ref>
+			</interceptor-stack>
+			<interceptor-stack name="LoginStack">
+				<interceptor-ref name="CommonStack" />
+				<interceptor-ref name="LoginInterceptor" />
+			</interceptor-stack>
+			<interceptor-stack name="AdminStack">
+				<interceptor-ref name="LoginStack" />
+				<interceptor-ref name="PermissionInterceptor">
+					<param name="permissionLevel">a</param>
+				</interceptor-ref>
+			</interceptor-stack>
+			<interceptor-stack name="UserStack">
+				<interceptor-ref name="LoginStack" />
+				<interceptor-ref name="PermissionInterceptor">
+					<param name="permissionLevel">u</param>
+				</interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="CommonStack"></default-interceptor-ref>
+		<default-action-ref name="home"></default-action-ref>
+		<global-results>
+			<result name="homepage" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/</param>
+				<param name="message">权限不足，无法访问此功能。</param>
+			</result>
+			<result name="login" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/userlogin</param>
+				<param name="message">此功能需要您登录后才可以访问，请登录。</param>
+			</result>
+		</global-results>
+	</package>
+	
+	<package name="homepackage" extends="wingame-default" namespace="/">
+		<action name="sidebar" class="SidebarAction">
+			<result name="a">/WEB-INF/jsp_sidebar/sidebar_a.jsp</result>
+			<result name="u">/WEB-INF/jsp_sidebar/sidebar_u.jsp</result>
+			<result name="g">/WEB-INF/jsp_sidebar/sidebar_g.jsp</result>
+		</action>
+		<action name="home" class="org.wingame.action.MessageActionBase">
+			<result>/WEB-INF/jsp_home/index.jsp</result>
+		</action>
+		<action name="permissionLink" class="PermissionLinkAction">
+			<result>/WEB-INF/jsp_public/permissionTool.jsp</result>
+		</action>
+		<action name="permissionButton" class="PermissionButtonAction">
+			<result>/WEB-INF/jsp_public/permissionTool2.jsp</result>
+		</action>
+	</package>
+	
+	<package name="loginpackage" extends="wingame-default" namespace="/userlogin">
+		<action name="loginAction" class="LoginAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/</param>
+			</result>
+			<result name="redirect" type="redirect">${redirect}</result>
+			<result name="input">/WEB-INF/jsp_login/index.jsp</result>
+			<interceptor-ref name="GuestStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="logout" class="org.wingame.action.login.LogoutAction">
+			<result type="redirect">${redirect}</result>
+		</action>
+		<action name="home" class="org.wingame.action.MessageActionBase">
+			<result>/WEB-INF/jsp_login/index.jsp</result>
+			<interceptor-ref name="GuestStack" />
+		</action>
+		<action name="register">
+			<result>/WEB-INF/jsp_login/register.jsp</result>
+			<interceptor-ref name="GuestStack" />
+		</action>
+		<action name="registerAction" class="RegisterAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/userlogin</param>
+				<param name="message">注册成功！请登录。</param>
+			</result>
+			<result name="input">/WEB-INF/jsp_login/register.jsp</result>
+			<interceptor-ref name="GuestStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="changemail">
+			<result>/WEB-INF/jsp_login/changemail.jsp</result>
+			<interceptor-ref name="LoginStack" />
+		</action>
+		<action name="changeMailAction" class="ChangeMailAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/</param>
+				<param name="message">邮箱修改成功！</param>
+			</result>
+			<result name="input">/WEB-INF/jsp_login/changemail.jsp</result>
+			<interceptor-ref name="LoginStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="changePasswordAction" class="ChangePasswordAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/</param>
+				<param name="message">密码修改成功！</param>
+			</result>
+			<result name="input">/WEB-INF/jsp_login/changepassword.jsp</result>
+			<interceptor-ref name="LoginStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="changepassword">
+			<result>/WEB-INF/jsp_login/changepassword.jsp</result>
+			<interceptor-ref name="LoginStack" />
+		</action>
+		<action name="resetPasswordAction" class="ResetPasswordAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/userlogin</param>
+				<param name="message">含有新密码的邮件已发往您的邮箱，请查收后用新密码登录。</param>
+			</result>
+			<result name="input">/WEB-INF/jsp_login/forget.jsp</result>
+			<interceptor-ref name="GuestStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="forget">
+			<result>/WEB-INF/jsp_login/forget.jsp</result>
+			<interceptor-ref name="GuestStack" />
+		</action>
+	</package>
+	
+	<package name="usermgmtpackage" extends="wingame-default" namespace="/usermgmt">
+		<action name="home" class="org.wingame.action.DataListAction">
+			<param name="entityType">org.wingame.dao.TUser</param>
+			<param name="itemsPerPage">10</param>
+			<result>/WEB-INF/jsp_usermgmt/deleteuser.jsp</result>
+			<interceptor-ref name="AdminStack" />
+		</action>
+		<action name="userRemoveAction" class="UserRemoveAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/usermgmt</param>
+				<param name="message">删除用户成功。</param>
+			</result>
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/usermgmt</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+	</package>
+	
+	<package name="meetingpackage" extends="wingame-default" namespace="/meeting">
+		<action name="home" class="org.wingame.action.DataListAction">
+			<param name="entityType">org.wingame.dao.VMeeting</param>
+			<param name="itemsPerPage">10</param>
+			<result>/WEB-INF/jsp_meeting/index.jsp</result>
+		</action>
+		<action name="detail" class="org.wingame.action.SingleDataAction">
+			<param name="entityType">org.wingame.dao.VMeeting</param>
+			<param name="idType">id.MId</param>
+			<result>/WEB-INF/jsp_meeting/detail.jsp</result>
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/meeting</param>
+				<param name="message">此编号对应的会议不存在。</param>
+			</result>
+		</action>
+		<action name="attended" class="MeetingAttendedAction">
+			<result>/WEB-INF/jsp_meeting/meetingfileinfo.jsp</result>
+		</action>
+		<action name="edit" class="org.wingame.action.SingleDataAction">
+			<param name="entityType">org.wingame.dao.TMeeting</param>
+			<param name="idType">MId</param>
+			<result>/WEB-INF/jsp_meeting/edit.jsp</result>
+			<result name="error">/WEB-INF/jsp_meeting/edit.jsp</result>
+			<interceptor-ref name="AdminStack" />
+		</action>
+		<action name="changeMeeting" class="MeetingAction">
+			<result type="redirectAction">
+				<param name="actionName">detail</param>
+				<param name="namespace">/meeting</param>
+				<param name="id">${id}</param>
+				<param name="message">添加或修改会议成功。</param>
+			</result>
+			<result name="input">
+				<param name="location">/WEB-INF/jsp_meeting/edit.jsp</param>
+				<param name="id">${id}</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="delete" class="MeetingRemoveAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/meeting</param>
+				<param name="message">会议删除成功。</param>
+			</result>
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/meeting</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="getTable" class="ExcelTableAction">
+			<result type="stream">
+				<param name="contentType">application/vnd.ms-excel</param>
+				<param name="inputName">target</param>		<!-- InputStream -->
+				<param name="contentDescription">filename="会议名单.xls"</param>
+				<param name="bufferSize">4096</param>
+			</result>
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/</param>
+				<param name="message">请检查会议编号是否正确。</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+		</action>
+	</package>
+	
+	<package name="announcepackage" extends="wingame-default" namespace="/announcement">
+		<action name="home" class="org.wingame.action.DataListAction">
+			<param name="entityType">org.wingame.dao.VMeeting</param>
+			<result>/WEB-INF/jsp_announce/index.jsp</result>
+		</action>
+		<action name="annlist" class="org.wingame.action.DataListAction">
+			<param name="entityType">org.wingame.dao.TAnnounce</param>
+			<param name="meetingKeyName">TMeeting.MId</param>
+			<param name="itemsPerPage">10</param>
+			<result>/WEB-INF/jsp_announce/annlist.jsp</result>
+		</action>
+		<action name="detail" class="org.wingame.action.SingleDataAction">
+			<param name="entityType">org.wingame.dao.TAnnounce</param>
+			<param name="idType">annId</param>
+			<result>/WEB-INF/jsp_announce/detail.jsp</result>
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/announcement</param>
+				<param name="message">此编号对应的公告不存在。</param>
+			</result>
+		</action>
+		<action name="edit" class="org.wingame.action.SingleDataAction">
+			<param name="entityType">org.wingame.dao.TAnnounce</param>
+			<param name="idType">annId</param>
+			<result>/WEB-INF/jsp_announce/edit.jsp</result>
+			<result name="error">/WEB-INF/jsp_announce/edit.jsp</result>
+			<interceptor-ref name="AdminStack" />
+		</action>
+		<action name="changeAnnounce" class="AnnounceAction">
+			<result type="redirectAction">
+				<param name="actionName">detail</param>
+				<param name="namespace">/announcement</param>
+				<param name="id">${id}</param>
+				<param name="message">添加或修改公告成功。</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="delete" class="AnnounceRemoveAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/announcement</param>
+				<param name="message">公告删除成功。</param>
+			</result>
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/announcement</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+	</package>
+	
+	<package name="fileuploadpackage" extends="wingame-default" namespace="/fileupload">
+		<action name="home" class="org.wingame.action.DataListAction">
+			<param name="entityType">org.wingame.dao.VMeeting</param>
+			<result>/WEB-INF/jsp_fileupload/index.jsp</result>
+			<interceptor-ref name="UserStack"></interceptor-ref>
+		</action>
+		<action name="selectmeeting" class="FileStatusAction">
+			<result>/WEB-INF/jsp_fileupload/selectmeeting.jsp</result>
+			<result name="error">/WEB-INF/jsp_fileupload/error.jsp</result>
+			<interceptor-ref name="UserStack" />
+		</action>
+		<action name="input" class="org.wingame.action.fileupload.FileInputAction">
+			<result type="redirectAction">
+				<param name="actionName">selectmeeting</param>
+				<param name="namespace">/fileupload</param>
+				<param name="id">${id}</param>
+				<param name="message">${message}</param>
+			</result>
+			<result name="error">/WEB-INF/jsp_fileupload/error.jsp</result>
+			<interceptor-ref name="UserStack" />
+		</action>
+		<action name="upload" class="FileUploadAction">
+			<result type="redirectAction">
+				<param name="actionName">selectmeeting</param>
+				<param name="namespace">/fileupload</param>
+				<param name="id">${id}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">input</param>
+				<param name="namespace">/fileupload</param>
+				<param name="message">文件大小超过10MB，请压缩或上传网盘后再试！</param>
+			</result>
+			<result name="null" type="redirectAction">
+				<param name="actionName">input</param>
+				<param name="namespace">/fileupload</param>
+				<param name="message">请选择文件！</param>
+			</result>
+			<result name="error">/WEB-INF/jsp_fileupload/error.jsp</result>
+			<interceptor-ref name="UserStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+		<action name="delete" class="FileDeleteAction">
+			<result type="redirectAction">
+				<param name="actionName">selectmeeting</param>
+				<param name="namespace">/fileupload</param>
+				<param name="id">${id}</param>
+			</result>
+			<result name="error">/WEB-INF/jsp_fileupload/error.jsp</result>
+			<interceptor-ref name="UserStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+	</package>
+	
+	<package name="filemgmtpackage" extends="wingame-default" namespace="/filemgmt">
+		<action name="home" class="org.wingame.action.DataListAction">
+			<param name="entityType">org.wingame.dao.VMeeting</param>
+			<result>/WEB-INF/jsp_filemgmt/index.jsp</result>
+			<interceptor-ref name="AdminStack" />
+		</action>
+		<action name="filelist" class="FileListAction">
+			<param name="itemsPerPage">10</param>
+			<result>/WEB-INF/jsp_filemgmt/filelist.jsp</result>
+			<interceptor-ref name="AdminStack" />
+		</action>
+		<action name="verify" class="FileVerifyAction">
+			<result type="redirectAction">
+				<param name="actionName">filelist</param>
+				<param name="namespace">/filemgmt</param>
+				<param name="meetingId">${mid}</param>
+				<param name="page">${page}</param>
+			</result>
+			<interceptor-ref name="AdminStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+	</package>
+	
+	<package name="applicationpackage" extends="wingame-default" namespace="/application">
+		<action name="home" class="ApplyHomeAction">
+			<result name="error" type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/</param>
+				<param name="message">很抱歉，会议预报名系统不允许直接通过输入地址进行访问。</param>
+			</result>
+			<result name="applied">/WEB-INF/jsp_application/applied.jsp</result>
+			<result name="toapply">/WEB-INF/jsp_application/toapply.jsp</result>
+			<interceptor-ref name="UserStack" />
+		</action>
+		<action name="apply" class="ApplicationAction">
+			<result type="redirectAction">
+				<param name="actionName">home</param>
+				<param name="namespace">/application</param>
+				<param name="id">${id}</param>
+			</result>
+			<interceptor-ref name="UserStack" />
+			<interceptor-ref name="GetMethodInterceptor" />
+		</action>
+	</package>
+</struts>
